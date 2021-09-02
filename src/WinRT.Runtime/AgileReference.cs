@@ -38,7 +38,7 @@ namespace WinRT
                     ref iid,
                     instance.ThisPtr,
                     &agileReference));
-#if NET5_0
+#if NET
                 _agileReference = (IAgileReference)new SingleInterfaceOptimizedObject(typeof(IAgileReference), ObjectReference<ABI.WinRT.Interop.IAgileReference.Vftbl>.Attach(ref agileReference));
 #else
                 _agileReference = ABI.WinRT.Interop.IAgileReference.FromAbi(agileReference).AsType<ABI.WinRT.Interop.IAgileReference>();
@@ -67,7 +67,14 @@ namespace WinRT
             {
                 if (_cookie != IntPtr.Zero)
                 {
-                    Git.Value.RevokeInterfaceFromGlobal(_cookie);
+                    try
+                    {
+                        Git.Value.RevokeInterfaceFromGlobal(_cookie);
+                    }
+                    catch(ArgumentException)
+                    {
+                        // Revoking cookie from GIT table may fail if apartment is gone.
+                    }
                 }
                 disposed = true;
             }
